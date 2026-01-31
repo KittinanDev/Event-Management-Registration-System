@@ -43,3 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// API endpoints for real-time updates
+Route::get('/api/events/{event}/seats', [EventController::class, 'seatsAvailability']);
+Route::get('/api/events/{event}/check-in-stats', [CheckInController::class, 'stats']);

@@ -56,4 +56,20 @@ class CheckInController extends Controller
             'checkInRate' => $checkInRate,
         ]);
     }
+
+    public function stats(Event $event)
+    {
+        $totalRegistrations = $event->registrations()->where('status', 'confirmed')->count();
+        $checkedIn = $event->registrations()
+            ->whereHas('checkIn')
+            ->count();
+
+        $checkInRate = $totalRegistrations > 0 ? round(($checkedIn / $totalRegistrations) * 100, 2) : 0;
+
+        return response()->json([
+            'checked_in' => $checkedIn,
+            'total' => $totalRegistrations,
+            'rate' => $checkInRate,
+        ]);
+    }
 }

@@ -81,4 +81,14 @@ class EventController extends Controller
 
         return redirect()->route('events.index')->with('success', 'Event deleted successfully');
     }
+
+    public function seatsAvailability(Event $event)
+    {
+        return response()->json([
+            'available' => $event->available_seats ?? $event->max_participants,
+            'capacity' => $event->max_participants,
+            'confirmed' => $event->confirmed_count,
+            'updated_at' => now()->toIso8601String(),
+        ]);
+    }
 }
