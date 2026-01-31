@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendRegistrationConfirmationJob;
 use App\Models\Event;
 use App\Models\Registration;
 use Illuminate\Http\Request;
@@ -24,15 +25,17 @@ class RegistrationController extends Controller
             return back()->with('error', 'Already registered for this event');
         }
 
-        DB::transaction(function () use ($event) {
+        $registration = DB::transaction(function () use ($event) {
             Event::findOrFail($event->id)->lockForUpdate();
             
-            Registration::create([
+            return Registration::create([
                 'event_id' => $event->id,
                 'user_id' => Auth::id(),
                 'status' => 'confirmed',
             ]);
         });
+
+        SendRegistrationConfirmationJob::dispatch($registration);
 
         return back()->with('success', 'Successfully registered');
     }
