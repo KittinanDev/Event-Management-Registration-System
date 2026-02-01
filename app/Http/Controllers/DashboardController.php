@@ -39,16 +39,19 @@ class DashboardController extends Controller
         $registrations = $user->registrations()
             ->with('event')
             ->get()
+            ->filter(function ($registration) {
+                return $registration->event !== null;
+            })
             ->sortByDesc(function ($registration) {
                 return $registration->event->start_datetime;
             });
 
         $upcoming = $registrations->filter(function ($registration) {
-            return $registration->event->end_datetime >= now();
+            return $registration->event && $registration->event->end_datetime >= now();
         });
 
         $history = $registrations->filter(function ($registration) {
-            return $registration->event->end_datetime < now();
+            return $registration->event && $registration->event->end_datetime < now();
         });
 
         return view('dashboard.user', [
