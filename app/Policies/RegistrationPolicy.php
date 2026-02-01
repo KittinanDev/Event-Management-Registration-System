@@ -10,6 +10,9 @@ class RegistrationPolicy
 {
     public function cancel(User $user, Registration $registration): bool
     {
-        return $user->id === $registration->user_id || $user->hasRole('organizer');
+        return $user->id === $registration->user_id
+            || $user->hasRole('organizer')
+            || $user->hasRole('admin')
+            || $user->role === 'admin';
     }
 }

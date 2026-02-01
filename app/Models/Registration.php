@@ -14,10 +14,12 @@ class Registration extends Model
         'user_id',
         'status',
         'registered_at',
+        'check_in_time',
     ];
 
     protected $casts = [
         'registered_at' => 'datetime',
+        'check_in_time' => 'datetime',
     ];
 
     // Relationships
@@ -31,8 +33,4 @@ class Registration extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function checkIn()
-    {
-        return $this->hasOne(CheckIn::class);
-    }
 }

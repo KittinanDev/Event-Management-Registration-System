@@ -18,6 +18,8 @@ class Event extends Model
         'start_datetime',
         'end_datetime',
         'max_participants',
+        'max_attendees',
+        'current_attendees',
         'status',
         'image',
     ];
@@ -39,35 +41,33 @@ class Event extends Model
     }
 
     // Scopes
-    public function scopePublished($query)
+    public function scopeOpen($query)
     {
-        return $query->where('status', 'published');
+        return $query->where('status', 'open');
     }
 
     public function scopeUpcoming($query)
     {
         return $query->where('start_datetime', '>', now())
-                     ->published();
+                     ->open();
     }
 
     // Accessors
     public function getAvailableSeatsAttribute()
     {
-        if ($this->max_participants === null) {
+        $max = $this->max_attendees ?? $this->max_participants;
+
+        if ($max === null) {
             return null;
         }
 
-        $registeredCount = $this->registrations()
-            ->where('status', 'confirmed')
-            ->count();
+        $current = $this->current_attendees ?? 0;
 
-        return max(0, $this->max_participants - $registeredCount);
+        return max(0, $max - $current);
     }
 
     public function getConfirmedCountAttribute()
     {
-        return $this->registrations()
-            ->where('status', 'confirmed')
-            ->count();
+        return $this->current_attendees ?? 0;
     }
 }

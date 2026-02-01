@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class EventController extends Controller
 {
+    use AuthorizesRequests;
     public function index()
     {
-        $events = Event::published()->upcoming()->paginate(12);
+        $events = Event::open()->upcoming()->paginate(12);
         return view('events.index', ['events' => $events]);
     }
 
@@ -36,11 +38,14 @@ class EventController extends Controller
             'location' => 'required|string|max:200',
             'start_datetime' => 'required|date|after_or_equal:now',
             'end_datetime' => 'required|date|after_or_equal:start_datetime',
-            'max_participants' => 'nullable|integer|min:1',
-            'status' => 'required|in:draft,published,cancelled',
+            'max_attendees' => 'nullable|integer|min:1',
+            'status' => 'required|in:open,closed,ongoing,completed,cancelled',
         ]);
 
-        $event = Auth::user()->events()->create($validated);
+        $payload = $validated;
+        $payload['max_participants'] = $validated['max_attendees'] ?? null;
+
+        $event = Auth::user()->events()->create($payload);
 
         return redirect()->route('events.show', $event)->with('success', 'Event created successfully');
     }
@@ -63,11 +68,14 @@ class EventController extends Controller
             'location' => 'required|string|max:200',
             'start_datetime' => 'required|date',
             'end_datetime' => 'required|date|after_or_equal:start_datetime',
-            'max_participants' => 'nullable|integer|min:1',
-            'status' => 'required|in:draft,published,cancelled',
+            'max_attendees' => 'nullable|integer|min:1',
+            'status' => 'required|in:open,closed,ongoing,completed,cancelled',
         ]);
 
-        $event->update($validated);
+        $payload = $validated;
+        $payload['max_participants'] = $validated['max_attendees'] ?? null;
+
+        $event->update($payload);
 
         return redirect()->route('events.show', $event)->with('success', 'Event updated successfully');
     }
@@ -79,6 +87,16 @@ class EventController extends Controller
         
         $event->delete();
 
-        return redirect()->route('events.index')->with('success', 'Event deleted successfully');
+        return redirect()->route('dashboard')->with('success', 'Event deleted successfully');
+    }
+
+    public function seatsAvailability(Event $event)
+    {
+        return response()->json([
+            'available' => $event->available_seats ?? ($event->max_attendees ?? $event->max_participants),
+            'capacity' => $event->max_attendees ?? $event->max_participants,
+            'confirmed' => $event->confirmed_count,
+            'updated_at' => now()->toIso8601String(),
+        ]);
     }
 }

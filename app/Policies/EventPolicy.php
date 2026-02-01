@@ -15,21 +15,21 @@ class EventPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole('organizer');
+        return $user->role === 'admin' || $user->hasRole('admin') || $user->hasRole('organizer');
     }
 
     public function update(User $user, Event $event): bool
     {
-        return $user->id === $event->user_id;
+        return $user->role === 'admin' || $user->hasRole('admin') || $user->id === $event->user_id;
     }
 
     public function delete(User $user, Event $event): bool
     {
-        return $user->id === $event->user_id;
+        return $user->role === 'admin' || $user->hasRole('admin') || $user->id === $event->user_id;
     }
 
     public function checkIn(User $user, Event $event): bool
     {
-        return $user->id === $event->user_id;
+        return $user->role === 'admin' || $user->hasRole('admin') || $user->id === $event->user_id;
     }
 }
