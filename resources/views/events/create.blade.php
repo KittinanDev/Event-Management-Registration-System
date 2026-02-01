@@ -1,7 +1,9 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Create Event</h2>
+    </x-slot>
 
-@section('content')
-<div class="py-12">
+    <div class="py-12">
     <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 bg-white border-b border-gray-200">
@@ -49,18 +51,20 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="max_participants">Max Participants (leave empty for unlimited)</label>
-                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('max_participants') border-red-500 @enderror" 
-                            id="max_participants" type="number" name="max_participants" value="{{ old('max_participants', $event->max_participants ?? '') }}" min="1">
-                        @error('max_participants') <p class="text-red-500 text-xs italic">{{ $message }}</p> @enderror
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="max_attendees">Max Attendees (leave empty for unlimited)</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('max_attendees') border-red-500 @enderror" 
+                            id="max_attendees" type="number" name="max_attendees" value="{{ old('max_attendees', $event->max_attendees ?? $event->max_participants ?? '') }}" min="1">
+                        @error('max_attendees') <p class="text-red-500 text-xs italic">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="mb-6">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="status">Status</label>
                         <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('status') border-red-500 @enderror" 
                             id="status" name="status" required>
-                            <option value="draft" {{ old('status', $event->status ?? '') === 'draft' ? 'selected' : '' }}>Draft</option>
-                            <option value="published" {{ old('status', $event->status ?? '') === 'published' ? 'selected' : '' }}>Published</option>
+                            <option value="open" {{ old('status', $event->status ?? '') === 'open' ? 'selected' : '' }}>Open</option>
+                            <option value="closed" {{ old('status', $event->status ?? '') === 'closed' ? 'selected' : '' }}>Closed</option>
+                            <option value="ongoing" {{ old('status', $event->status ?? '') === 'ongoing' ? 'selected' : '' }}>Ongoing</option>
+                            <option value="completed" {{ old('status', $event->status ?? '') === 'completed' ? 'selected' : '' }}>Completed</option>
                             <option value="cancelled" {{ old('status', $event->status ?? '') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                         </select>
                         @error('status') <p class="text-red-500 text-xs italic">{{ $message }}</p> @enderror
@@ -76,5 +80,5 @@
             </div>
         </div>
     </div>
-</div>
-@endsection
+    </div>
+</x-app-layout>

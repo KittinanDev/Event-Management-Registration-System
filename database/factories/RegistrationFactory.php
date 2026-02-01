@@ -17,10 +17,11 @@ class RegistrationFactory extends Factory
     public function definition(): array
     {
         return [
-            'event_id' => 1,
-            'user_id' => 1,
-            'status' => 'confirmed',
+            'event_id' => \App\Models\Event::factory(),
+            'user_id' => \App\Models\User::factory(),
+            'status' => 'registered',
             'registered_at' => now(),
+            'check_in_time' => null,
         ];
     }
 }

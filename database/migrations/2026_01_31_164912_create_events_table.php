@@ -20,7 +20,7 @@ return new class extends Migration
             $table->dateTime('start_datetime');
             $table->dateTime('end_datetime');
             $table->unsignedInteger('max_participants')->nullable();
-            $table->enum('status', ['draft', 'published', 'cancelled'])->default('draft');
+            $table->enum('status', ['draft', 'published', 'cancelled', 'open', 'closed', 'ongoing', 'completed'])->default('draft');
             $table->string('image')->nullable();
             $table->timestamps();
             $table->softDeletes();

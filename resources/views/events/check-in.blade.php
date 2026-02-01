@@ -1,7 +1,9 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Check-in: {{ $event->title }}</h2>
+    </x-slot>
 
-@section('content')
-<div class="py-12">
+    <div class="py-12">
     <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 bg-white border-b border-gray-200">
@@ -29,7 +31,7 @@
                         <thead>
                             <tr class="bg-gray-100">
                                 <th class="border border-gray-300 p-2 text-left">Name</th>
-                                <th class="border border-gray-300 p-2 text-left">Email</th>
+                                <th class="border border-gray-300 p-2 text-left">Phone</th>
                                 <th class="border border-gray-300 p-2 text-left">Status</th>
                                 <th class="border border-gray-300 p-2 text-left">Action</th>
                             </tr>
@@ -37,25 +39,36 @@
                         <tbody>
                             @forelse($registrations as $registration)
                                 <tr class="hover:bg-gray-50">
-                                    <td class="border border-gray-300 p-2">{{ $registration->user->name }}</td>
-                                    <td class="border border-gray-300 p-2">{{ $registration->user->email }}</td>
+                                    <td class="border border-gray-300 p-2">{{ $registration->user->full_name ?? $registration->user->name }}</td>
+                                    <td class="border border-gray-300 p-2">{{ $registration->user->phone ?? '-' }}</td>
                                     <td class="border border-gray-300 p-2">
-                                        @if($registration->checkIn)
+                                        @if($registration->status === 'checked_in')
                                             <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-bold">✓ Checked In</span>
+                                        @elseif($registration->status === 'registered')
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded font-bold">Registered</span>
+                                        @elseif($registration->status === 'no_show')
+                                            <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded font-bold">No Show</span>
                                         @else
-                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded font-bold">Pending</span>
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded font-bold">{{ ucfirst($registration->status) }}</span>
                                         @endif
                                     </td>
                                     <td class="border border-gray-300 p-2">
-                                        @if(!$registration->checkIn)
-                                            <form action="{{ route('check-in.store', [$event, $registration]) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">
-                                                    Check In
-                                                </button>
-                                            </form>
+                                        @php
+                                            $withinTime = now()->between($event->start_datetime, $event->end_datetime);
+                                        @endphp
+                                        @if($registration->status !== 'checked_in')
+                                            @if($withinTime)
+                                                <form action="{{ route('check-in.store', [$event, $registration]) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">
+                                                        Check In
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <button type="button" class="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded cursor-not-allowed">Check In</button>
+                                            @endif
                                         @else
-                                            <span class="text-green-600">{{ $registration->checkIn->checked_in_at->format('M d, H:i') }}</span>
+                                            <span class="text-green-600">{{ $registration->check_in_time?->format('M d, H:i') }}</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -82,7 +95,6 @@
     </div>
 </div>
 
-@push('scripts')
 <script>
     const eventId = {{ $event->id }};
     
@@ -97,5 +109,5 @@
             .catch(error => console.error('Error fetching stats:', error));
     }, 3000);
 </script>
-@endpush
-@endsection
+    </div>
+</x-app-layout>

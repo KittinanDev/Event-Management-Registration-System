@@ -20,6 +20,9 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'full_name',
+        'phone',
+        'role',
         'email',
         'password',
     ];
@@ -53,9 +56,8 @@ class User extends Authenticatable
         return $this->hasMany(Event::class);
     }
 
-        public function registrations()
-        {
-            return $this->hasMany(Registration::class);
-        }
-    
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class);
     }
+}
