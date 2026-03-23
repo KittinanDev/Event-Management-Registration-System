@@ -1,0 +1,56 @@
+services:
+  - type: web
+    name: eventhub-web
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      - key: APP_NAME
+        value: EventHub
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://eventhub-web.onrender.com
+      - key: APP_KEY
+        generateValue: true
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: eventhub-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: eventhub-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: eventhub-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: eventhub-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: eventhub-db
+          property: password
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: FILESYSTEM_DISK
+        value: public
+
+databases:
+  - name: eventhub-db
+    plan: free
+    databaseName: eventhub
+    user: eventhub
