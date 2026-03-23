@@ -103,8 +103,14 @@ class DashboardController extends Controller
 
         $eventsByStatusData = collect(self::STATUS_LABELS)->map(fn (string $status) => (int) ($statusCounts[$status] ?? 0));
 
+        $monthExpression = match (DB::connection()->getDriverName()) {
+            'sqlite' => "strftime('%Y-%m', registered_at)",
+            'pgsql' => "to_char(registered_at, 'YYYY-MM')",
+            default => "DATE_FORMAT(registered_at, '%Y-%m')",
+        };
+
         $monthlyRows = Registration::query()
-            ->selectRaw("DATE_FORMAT(registered_at, '%Y-%m') as month_key")
+            ->selectRaw("{$monthExpression} as month_key")
             ->selectRaw('COUNT(*) as total')
             ->where('registered_at', '>=', now()->copy()->subMonths(2)->startOfMonth())
             ->groupBy('month_key')
@@ -114,7 +120,6 @@ class DashboardController extends Controller
 
         $monthKeys = collect(range(2, 0, -1))
             ->map(fn (int $offset) => now()->copy()->subMonths($offset)->format('Y-m'))
-            ->push(now()->format('Y-m'))
             ->values();
 
         $monthlyRegistrationLabels = $monthKeys
